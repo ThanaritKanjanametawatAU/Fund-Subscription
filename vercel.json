@@ -1,13 +1,11 @@
 {
-  "devCommand": "npm run dev:all",
+  "version": 2,
   "builds": [
     {
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "memory": 1024,
-        "maxDuration": 60,
         "runtime": "python3.9"
       }
     },
@@ -31,7 +29,6 @@
     }
   ],
   "env": {
-    "PYTHON_VERSION": "3.9",
-    "PYTHONPATH": "${PYTHONPATH}:${VERCEL_ROOT_DIR}"
+    "PYTHON_VERSION": "3.9"
   }
 }
