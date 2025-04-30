@@ -1,6 +1,6 @@
 # Fund Subscription Generator
 
-A Next.js application with a Python backend for generating fund subscription reports.
+A Next.js application with a FastAPI backend for generating fund subscription reports.
 
 ## Features
 
@@ -8,7 +8,10 @@ A Next.js application with a Python backend for generating fund subscription rep
 - Drag and drop file uploads for Excel files
 - Date selection with a user-friendly calendar
 - Progress tracking during file processing
-- Excel report generation using the same logic as the original Python application
+- Excel report generation using pandas and openpyxl
+- FastAPI backend for efficient API processing
+- Vercel-compatible deployment with Python serverless functions
+- Fallback HTML report generation when Python dependencies are unavailable
 
 ## Prerequisites
 
@@ -33,30 +36,85 @@ npm install
 yarn install
 ```
 
-### 3. Install Python dependencies
+### 3. Set up Python virtual environment
 
 ```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+```
+
+### 4. Install Python dependencies
+
+```bash
+# Install consolidated dependencies
 pip install -r requirements.txt
 ```
 
-### 4. Create necessary directories
+### 5. Create necessary directories
 
 ```bash
 mkdir -p public/downloads
 mkdir -p tmp
+mkdir -p test_data
 ```
 
-## Development
+## Local Development
 
-Run the development server:
+### Running the Application
+
+There are two ways to run the application:
+
+#### 1. Using Next.js API Routes (Recommended for local development)
+
+This method uses the Next.js API routes with the virtual environment Python:
 
 ```bash
+# Make sure your virtual environment is activated
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # macOS/Linux
+
+# Start the Next.js development server
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at http://localhost:3000.
+
+#### 2. Using FastAPI Backend (For production-like testing)
+
+This method runs the FastAPI backend separately:
+
+```bash
+# Terminal 1: Start FastAPI backend
+python -m uvicorn api.index:app --reload --port 8000
+
+# Terminal 2: Start Next.js frontend
+npm run dev
+```
+
+The frontend will be available at http://localhost:3000 and the FastAPI backend at http://localhost:8000.
+
+### Testing
+
+Run the unit tests to verify everything is working correctly:
+
+```bash
+# Make sure your virtual environment is activated
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # macOS/Linux
+
+# Run tests
+python -m pytest tests/test_excel_generation.py -v
+```
+
+For the Excel generation test to work, you need to place sample files in the test_data directory:
+- `test_data/MasterFile.xlsx`
+- `test_data/Data.xlsx`
 
 ## Usage
 
@@ -65,79 +123,109 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 3. Click "Generate Report" to process the files
 4. Once processing is complete, download the generated report
 
-## Deployment Options
+## Project Structure
 
-### Option 1: Deploy on Vercel with Python Serverless Functions
+### Frontend (Next.js)
 
-This application can be deployed on Vercel with Python serverless functions:
+- `/components` - React components:
+  - `FileUpload.js` - Drag and drop file upload component
+  - `DatePicker.js` - Date selector for report generation
+  - `ProgressBar.js` - Visual indicator of processing status
+  - `ResultDisplay.js` - Component to show results and download links
+
+- `/pages` - Next.js pages and API routes:
+  - `index.js` - Main application page with form for file uploads
+  - `/api/optimized-process.js` - Consolidated API endpoint for file processing
+  - `/api/download.js` - Manages file downloads
+
+### FastAPI Backend (for Vercel)
+
+- `/api` - FastAPI serverless functions:
+  - `index.py` - Main FastAPI application entry point
+  - `process.py` - Handles file uploads and processing
+  - `download.py` - Manages file downloads
+
+### Utility Functions
+
+- `/utils` - Python utility functions:
+  - `process_files.py` - Core file processing logic
+
+### Testing
+
+- `/tests` - Test directory:
+  - `test_excel_generation.py` - Unit tests for the Excel generation process
+
+### Other Directories
+
+- `/public` - Static assets and download files
+- `/tmp` - Temporary processing files
+- `/test_data` - Sample files for testing
+
+## Deployment on Vercel
+
+This application is designed to be deployed on Vercel with Python serverless functions:
 
 1. Install the Vercel CLI:
 ```bash
 npm i -g vercel
 ```
 
-2. Deploy to Vercel:
+2. Build and deploy to Vercel:
 ```bash
 vercel
 ```
 
 The included `vercel.json` file configures the Python serverless functions with appropriate memory and timeout settings.
 
-### Option 2: Separate Frontend and Backend Deployment
+### Important Vercel Configuration
 
-#### 1. Deploy the Next.js Frontend on Vercel
+The application uses the following Vercel settings:
+- Python 3.9+ runtime
+- 1GB memory allocation for Python functions
+- 60-second timeout for processing large files
 
-```bash
-vercel
-```
+## Troubleshooting
 
-#### 2. Deploy the FastAPI Backend Separately
+### Excel Generation Issues
 
-The project includes a FastAPI server that can be deployed on any Python-friendly platform:
+If you encounter issues with Excel file generation:
 
-1. Update the API endpoint in `pages/index.js` to point to your backend server:
+1. Verify your Python environment is activated: `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (macOS/Linux)
+2. Confirm all dependencies are installed: `pip list | grep pandas`
+3. Check for error messages in the console
+4. Make sure your input files are valid Excel files in the expected format
+5. Check that the temporary directories (tmp, public/downloads) exist and have write permissions
 
-```javascript
-// In pages/index.js, replace this:
-const response = await axios.post('/api/process', formData, {
-  
-// With this:
-const response = await axios.post('https://your-backend-url.com/api/process', formData, {
-```
+### Python Path Issues
 
-2. Run the FastAPI server:
+If the application can't find the correct Python executable:
 
-```bash
-cd Fund-Subscription
-python utils/fastapi_server.py
-```
+1. Verify the path in `pages/api/python-path.txt` points to your virtual environment's Python
+2. Make sure the Python in your virtual environment has all required dependencies installed
 
-3. Deploy the FastAPI server to a platform like Heroku, Render, or PythonAnywhere:
+## Maintenance
 
-```bash
-# Example for Heroku
-heroku create
-git push heroku main
-```
-
-## File Structure
-
-- `/components` - React components (FileUpload, DatePicker, etc.)
-- `/pages` - Next.js pages including the API endpoint
-- `/pages/api` - API routes for handling file processing
-- `/public` - Static assets and downloaded files
-- `/styles` - CSS styles including Tailwind configuration
-- `/utils` - Utility functions including Python processing logic
-  - `process_files.py` - Core functionality from original script
-  - `fastapi_server.py` - Standalone FastAPI server for separate deployment
-
-## Cleaning Up
+### Cleaning Up Temporary Files
 
 Temporary files and generated reports are stored in:
 - `/tmp` - Temporary processing files
 - `/public/downloads` - Generated reports
 
-You may want to set up scheduled cleanup of these directories in production.
+For local development, you can manually clean these directories:
+
+```bash
+rm -rf tmp/*
+rm -rf public/downloads/*
+```
+
+In production, consider setting up a scheduled task to clean these directories periodically.
+
+## Contributing
+
+1. Create a feature branch: `git checkout -b feature/my-feature`
+2. Make your changes
+3. Run tests: `python -m pytest tests/`
+4. Submit a pull request
 
 ## License
 

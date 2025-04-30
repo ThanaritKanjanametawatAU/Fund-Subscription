@@ -4,7 +4,6 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import { createSimplifiedExcelReport } from './no-python-fallback.js';
-import { getPythonPath } from './python-finder.js';
 
 // Consolidated process API - handles file uploads and processing with Python
 // with fallback to simplified Excel generation if Python execution fails
@@ -15,6 +14,24 @@ export const config = {
     bodyParser: false,
   },
 };
+
+// Get the path to the virtual environment Python
+function getVenvPythonPath() {
+  // Check for a configured path first
+  try {
+    const configPath = path.join(process.cwd(), 'pages', 'api', 'python-path.txt');
+    if (fs.existsSync(configPath)) {
+      const pythonPath = fs.readFileSync(configPath, 'utf8').trim();
+      return pythonPath;
+    }
+  } catch (error) {
+    console.warn('Could not load configured Python path:', error.message);
+  }
+  
+  // Fallback to default virtual environment path
+  const venvPythonPath = path.join(process.cwd(), 'venv', 'Scripts', 'python.exe');
+  return venvPythonPath;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -98,10 +115,10 @@ except Exception as e:
     sys.exit(1)
 `);
 
-    // Execute the Python script
+    // Execute the Python script with explicit venv Python path
     let pythonSuccess = false;
     try {
-      const pythonPath = getPythonPath();
+      const pythonPath = getVenvPythonPath();
       
       const result = execSync(`"${pythonPath}" "${scriptPath}"`, { 
         encoding: 'utf8',
@@ -110,7 +127,6 @@ except Exception as e:
       });
       
       pythonSuccess = true;
-      console.log('Python execution successful');
     } catch (error) {
       console.error('Python execution failed:', error.message);
       
@@ -139,17 +155,6 @@ except Exception as e:
     const publicFileName = `report-${jobId}.xlsx`;
     const publicFilePath = path.join(publicDir, publicFileName);
     fs.copyFileSync(outputPath, publicFilePath);
-
-    // Clean up temporary files
-    try {
-      fs.unlinkSync(scriptPath);
-      fs.unlinkSync(masterFileDestPath);
-      fs.unlinkSync(dataFileDestPath);
-      fs.unlinkSync(outputPath);
-      fs.rmdirSync(jobDir);
-    } catch (cleanupError) {
-      console.warn('Warning: Could not clean up all temporary files', cleanupError.message);
-    }
 
     // Return download URL
     const downloadUrl = `/downloads/${publicFileName}`;

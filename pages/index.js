@@ -49,8 +49,8 @@ export default function Home() {
       setProgress(30);
       setStatus('Uploading files...');
       
-      // Replace with your actual API endpoint (we'll create it later)
-      const response = await axios.post('/api/process', formData, {
+      // Use our optimized process endpoint
+      const response = await axios.post('/api/optimized-process', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -66,20 +66,11 @@ export default function Home() {
       setProgress(100);
       setStatus('Report generated and ready for download');
 
-      // Check if we're using the temp path (API download) or public download
-      let downloadUrl = response.data.downloadUrl;
-      
-      // If we have a tmpPath, ensure we use the API download route
-      if (response.data.tmpPath) {
-        // Extract the filename from the path
-        const tmpFileName = response.data.tmpPath.split('/').pop();
-        downloadUrl = `/api/download?file=${tmpFileName}`;
-      }
-      
+      // Use the download URL from the response
       setResult({
         success: 'Your report has been generated successfully! The download will start automatically.',
         error: null,
-        downloadUrl: downloadUrl,
+        downloadUrl: response.data.downloadUrl,
         fileName: response.data.fileName
       });
     } catch (error) {
@@ -88,7 +79,7 @@ export default function Home() {
       
       setResult({
         success: null,
-        error: error.response?.data?.error || 'An error occurred while processing your request.',
+        error: error.response?.data?.detail || error.response?.data?.error || 'An error occurred while processing your request.',
         downloadUrl: null
       });
     } finally {

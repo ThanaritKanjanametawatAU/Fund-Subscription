@@ -1,23 +1,35 @@
 {
-  "functions": {
-    "pages/api/*.js": {
-      "memory": 1024,
-      "maxDuration": 60
+  "devCommand": "npm run dev:all",
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "memory": 1024,
+        "maxDuration": 60
+      }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
     }
-  },
-  "buildCommand": "npm run vercel-build",
+  ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
     {
       "src": "/downloads/(.*)",
       "dest": "/public/downloads/$1"
     },
     {
-      "src": "/api/download",
-      "dest": "/api/download"
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ],
   "env": {
     "PYTHON_VERSION": "3.9",
-    "PYTHONPATH": "/var/task"
+    "PYTHONPATH": "${PYTHONPATH}:${VERCEL_ROOT_DIR}"
   }
 }

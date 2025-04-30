@@ -11,8 +11,15 @@ echo "PATH: $PATH"
 # Install Python dependencies using python3 module mode
 echo "Installing Python dependencies..."
 python3 -m pip install --upgrade pip
+
+# Install main requirements
 python3 -m pip install -r requirements.txt
-python3 -m pip install -r pages/api/requirements.txt
+
+# Install API-specific requirements for FastAPI
+python3 -m pip install -r api/requirements.txt
+
+# Install legacy API requirements (for compatibility during transition)
+[ -f pages/api/requirements.txt ] && python3 -m pip install -r pages/api/requirements.txt
 
 # Run npm build
 echo "Running npm build..."

@@ -2,87 +2,64 @@
 const fs = require('fs');
 const path = require('path');
 
-// Simple Excel creation without Python dependency - complete fallback mode
-async function createSimplifiedExcelReport(masterFilePath, dataFilePath, reportDate, outputPath) {
-  console.log('Using no-python fallback for Excel generation');
-  
+// Final fallback method if Python is not available
+const createSimplifiedExcelReport = async (masterFilePath, dataFilePath, reportDate, outputPath) => {
   try {
-    // This is a placeholder - in a production environment, you would use a Node.js
-    // Excel library like exceljs, xlsx, or similar
+    console.log('Using no-python fallback for Excel generation');
     
-    // For now, we'll create a very simple HTML file that looks like a report
-    // This can be displayed as a fallback when Python is unavailable
-    const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Fund Subscription Report</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    .header { margin-bottom: 30px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>Fund Subscription Report</h1>
-    <p>Report Date: ${reportDate}</p>
-  </div>
-  
-  <div>
-    <p>This is a simplified fallback report created when Python processing is unavailable.</p>
-    <p>Source Files:</p>
-    <ul>
-      <li>Master File: ${path.basename(masterFilePath)}</li>
-      <li>Data File: ${path.basename(dataFilePath)}</li>
-    </ul>
-  </div>
-  
-  <table>
-    <tr>
-      <th>Fund Name</th>
-      <th>Value</th>
-      <th>Status</th>
-    </tr>
-    <tr>
-      <td>Example Fund 1</td>
-      <td>$1,000,000</td>
-      <td>Active</td>
-    </tr>
-    <tr>
-      <td>Example Fund 2</td>
-      <td>$2,500,000</td>
-      <td>Active</td>
-    </tr>
-    <tr>
-      <td>Example Fund 3</td>
-      <td>$750,000</td>
-      <td>Pending</td>
-    </tr>
-  </table>
-  
-  <p style="margin-top: 30px; color: #888;">
-    Note: This is a fallback report. For the complete report, please contact support.
-  </p>
-</body>
-</html>
+    // Create a very basic HTML "report" as a fallback
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Fund Subscription Report - ${reportDate}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 2em; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+          .header { margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Fund Subscription Report</h1>
+          <p>Report date: ${reportDate}</p>
+          <p>This is a fallback report created when Python processing was unavailable.</p>
+        </div>
+        <div>
+          <h2>Files Processed</h2>
+          <ul>
+            <li>Master file: ${path.basename(masterFilePath)}</li>
+            <li>Data file: ${path.basename(dataFilePath)}</li>
+          </ul>
+        </div>
+        <p>
+          <b>Note:</b> This is a simplified HTML version of the report. For the full Excel report, 
+          please ensure Python with pandas is properly configured.
+        </p>
+      </body>
+      </html>
     `;
     
-    // Create HTML file as fallback
-    fs.writeFileSync(outputPath + '.html', htmlContent);
+    // Ensure the outputPath has HTML extension if we're using the HTML fallback
+    let htmlOutputPath = outputPath + '.html';
     
-    // Also create an empty Excel file as a placeholder
-    // This would typically be created with an Excel library
-    fs.writeFileSync(outputPath, 'This is a placeholder Excel file');
+    // Write the HTML fallback
+    fs.writeFileSync(htmlOutputPath, html);
     
+    // Create an empty file at the original output path
+    // with a note that real output is in the HTML file
+    const noteText = `This is a placeholder file. The actual report is in: ${path.basename(htmlOutputPath)}`;
+    fs.writeFileSync(outputPath, noteText);
+    
+    console.log(`Created fallback HTML report at ${htmlOutputPath}`);
     return true;
   } catch (error) {
-    console.error('Error in no-Python fallback report generation:', error);
-    return false;
+    console.error('Error creating simplified report:', error);
+    throw error;
   }
-}
+};
 
 module.exports = {
   createSimplifiedExcelReport,
