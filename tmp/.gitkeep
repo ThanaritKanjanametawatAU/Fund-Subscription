@@ -1,0 +1,2 @@
+# This file ensures the tmp directory is included in Git
+# The directory is needed for temporary file processing 

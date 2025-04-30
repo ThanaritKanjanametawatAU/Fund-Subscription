@@ -55,8 +55,10 @@ var/
 *.egg
 
 # temporary files
-/tmp/
-/public/downloads/
+/tmp/*
+/public/downloads/*
+!public/downloads/.gitkeep
+!tmp/.gitkeep
 
 # excel files
 *.xlsx

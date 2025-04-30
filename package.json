@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "chmod +x ./build.sh && ./build.sh",
+    "vercel-build": "pip install -r requirements.txt && pip install -r api/requirements.txt && next build",
     "start": "next start",
     "lint": "next lint",
     "api": "python -m uvicorn api.index:app --reload --host 0.0.0.0 --port 8000",
