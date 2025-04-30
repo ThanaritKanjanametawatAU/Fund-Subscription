@@ -65,11 +65,21 @@ export default function Home() {
       
       setProgress(100);
       setStatus('Report generated and ready for download');
+
+      // Check if we're using the temp path (API download) or public download
+      let downloadUrl = response.data.downloadUrl;
+      
+      // If we have a tmpPath, ensure we use the API download route
+      if (response.data.tmpPath) {
+        // Extract the filename from the path
+        const tmpFileName = response.data.tmpPath.split('/').pop();
+        downloadUrl = `/api/download?file=${tmpFileName}`;
+      }
       
       setResult({
         success: 'Your report has been generated successfully! The download will start automatically.',
         error: null,
-        downloadUrl: response.data.downloadUrl,
+        downloadUrl: downloadUrl,
         fileName: response.data.fileName
       });
     } catch (error) {
