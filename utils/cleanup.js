@@ -7,12 +7,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // Clean up temporary files older than this time (in milliseconds)
 const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
 function cleanupTempFiles() {
-  const tempDir = path.join(process.cwd(), 'tmp');
+  const tempDir = path.join(os.tmpdir(), 'fund-subscription');
   
   try {
     if (!fs.existsSync(tempDir)) {

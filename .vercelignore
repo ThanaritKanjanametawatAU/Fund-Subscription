@@ -10,4 +10,5 @@ venv
 test_data
 tests
 *.log
-.DS_Store 
+.DS_Store
+tmp/

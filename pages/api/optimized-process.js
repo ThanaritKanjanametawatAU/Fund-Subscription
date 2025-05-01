@@ -1,6 +1,7 @@
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { execSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import { createSimplifiedExcelReport } from './no-python-fallback.js';
@@ -51,7 +52,7 @@ export default async function handler(req, res) {
     }
 
     // Create temporary directory for files
-    const tempDir = path.join(process.cwd(), 'tmp');
+    const tempDir = path.join(os.tmpdir(), 'fund-subscription');
     fs.mkdirSync(tempDir, { recursive: true });
     
     // Create unique ID for this job
@@ -148,7 +149,7 @@ except Exception as e:
     }
 
     // Create public directory for downloads
-    const publicDir = path.join(process.cwd(), 'public', 'downloads');
+    const publicDir = path.join(os.tmpdir(), 'fund-subscription-public');
     fs.mkdirSync(publicDir, { recursive: true });
     
     // Generate download file
@@ -157,7 +158,7 @@ except Exception as e:
     fs.copyFileSync(outputPath, publicFilePath);
 
     // Return download URL
-    const downloadUrl = `/downloads/${publicFileName}`;
+    const downloadUrl = `/api/download?file=${publicFileName}`;
     return res.status(200).json({
       success: true,
       downloadUrl,

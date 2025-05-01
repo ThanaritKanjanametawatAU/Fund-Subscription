@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+import sys
 import os
 import traceback
 
@@ -76,4 +77,4 @@ async def download_files_endpoint(request: Request):
         print(error_detail)
         raise HTTPException(status_code=500, detail=error_detail)
 
- 
+# No Mangum handler - Vercel will handle it automatically

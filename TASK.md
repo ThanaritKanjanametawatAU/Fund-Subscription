@@ -112,3 +112,38 @@ For complete deployment and finalization:
 - [ ] 36. Perform final round of testing with the optimized codebase
 - [ ] 37. Deploy to Vercel with the cleaned-up codebase
 - [ ] 38. Finalize documentation
+
+# Project Task Breakdown
+
+## Overview
+Fix temporary directory path issues in Vercel serverless environment by replacing hardcoded paths with Node.js's os.tmpdir() function.
+
+## Tasks
+### 1. [Update Temporary Directory Paths]
+**Status:** Completed
+
+#### Subtasks:
+- [x] 1.1. [Analysis] - Identified the root cause of the error in Vercel serverless environment
+- [x] 1.2. [Update] - Modified optimized-process.js to use os.tmpdir() 
+- [x] 1.3. [Update] - Modified process.js to use os.tmpdir()
+- [x] 1.4. [Update] - Modified cleanup.js to use os.tmpdir()
+- [x] 1.5. [Update] - Modified public directory path to use os.tmpdir() for file downloads
+- [x] 1.6. [Update] - Updated download.js to check new temporary directory location first
+- [x] 1.7. [Update] - Updated download URLs to use API endpoint instead of static path
+
+### 2. [Implementation Notes]
+**Status:** Completed
+
+#### Key Changes:
+- Replaced `path.join(process.cwd(), 'tmp')` with `path.join(os.tmpdir(), 'fund-subscription')` 
+- Replaced `path.join(process.cwd(), 'public', 'downloads')` with `path.join(os.tmpdir(), 'fund-subscription-public')`
+- Added proper fallbacks in download.js to maintain backward compatibility
+- Changed download URLs from `/downloads/${publicFileName}` to `/api/download?file=${publicFileName}`
+
+### 3. [Testing]
+**Status:** Not Started
+
+#### Subtasks:
+- [ ] 3.1. [Test] - Test the application locally
+- [ ] 3.2. [Test] - Deploy to Vercel and verify error is resolved
+- [ ] 3.3. [Test] - Confirm file uploads and downloads work correctly in production
